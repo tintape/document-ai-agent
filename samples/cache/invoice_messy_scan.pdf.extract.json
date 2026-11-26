@@ -1,0 +1,102 @@
+{
+  "doc_name": "invoice_messy_scan.pdf",
+  "doc_type": "invoice",
+  "data": {
+    "vendor": {
+      "value": "Greenleaf Print Shop",
+      "confidence": "high",
+      "page": 1
+    },
+    "buyer": {
+      "value": "Maple Street Bakery",
+      "confidence": "high",
+      "page": 1
+    },
+    "invoice_number": {
+      "value": "GP-0393",
+      "confidence": "high",
+      "page": 1
+    },
+    "invoice_date": {
+      "value": "2026-11-10",
+      "confidence": "high",
+      "page": 1
+    },
+    "due_date": {
+      "value": null,
+      "confidence": "high",
+      "page": null
+    },
+    "currency": {
+      "value": "USD",
+      "confidence": "high",
+      "page": 1
+    },
+    "tax": {
+      "value": null,
+      "confidence": "high",
+      "page": null
+    },
+    "total": {
+      "value": "USD 195.00",
+      "confidence": "high",
+      "page": 1
+    },
+    "line_items": [
+      {
+        "description": {
+          "value": "Flyers A5, 500 pcs",
+          "confidence": "high",
+          "page": 1
+        },
+        "quantity": {
+          "value": null,
+          "confidence": "high",
+          "page": null
+        },
+        "unit_price": {
+          "value": null,
+          "confidence": "high",
+          "page": null
+        },
+        "amount": {
+          "value": "120.00",
+          "confidence": "high",
+          "page": 1
+        }
+      },
+      {
+        "description": {
+          "value": "Menu cards, 40 pcs",
+          "confidence": "high",
+          "page": 1
+        },
+        "quantity": {
+          "value": null,
+          "confidence": "high",
+          "page": null
+        },
+        "unit_price": {
+          "value": null,
+          "confidence": "high",
+          "page": null
+        },
+        "amount": {
+          "value": "60.00",
+          "confidence": "high",
+          "page": 1
+        }
+      }
+    ]
+  },
+  "flags": [
+    {
+      "field": "due_date",
+      "reason": "No due date found"
+    },
+    {
+      "field": "total",
+      "reason": "Line items (180.00) plus tax (0) do not add up to the total (195.00)"
+    }
+  ]
+}

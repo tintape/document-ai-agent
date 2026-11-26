@@ -1,0 +1,28 @@
+[
+  {
+    "question": "What is the total amount due?",
+    "answer": "The total amount due is USD 195.00.",
+    "quotes": [
+      {
+        "doc_name": "invoice_messy_scan.pdf",
+        "page": 1,
+        "text": "TOTAL USD 195.00",
+        "status": "unverified",
+        "note": "scan: no text to check"
+      }
+    ]
+  },
+  {
+    "question": "Is there a due date?",
+    "answer": "No. The invoice lists a date (2026-11-10) but does not contain a due date.",
+    "quotes": [
+      {
+        "doc_name": "invoice_messy_scan.pdf",
+        "page": 1,
+        "text": "Date: 2026-11-10",
+        "status": "unverified",
+        "note": "scan: no text to check"
+      }
+    ]
+  }
+]

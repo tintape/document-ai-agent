@@ -1,0 +1,28 @@
+[
+  {
+    "question": "How much notice is needed to end the contract?",
+    "answer": "Either party may end the agreement with 30 days written notice.",
+    "quotes": [
+      {
+        "doc_name": "contract_services.pdf",
+        "page": 2,
+        "text": "Either party may end this agreement with 30 days written notice.",
+        "status": "verified",
+        "note": ""
+      }
+    ]
+  },
+  {
+    "question": "What is the monthly fee?",
+    "answer": "USD 2,000 per month.",
+    "quotes": [
+      {
+        "doc_name": "contract_services.pdf",
+        "page": 1,
+        "text": "The Client pays a fixed fee of USD 2,000 per month, USD 24,000 in total.",
+        "status": "verified",
+        "note": ""
+      }
+    ]
+  }
+]

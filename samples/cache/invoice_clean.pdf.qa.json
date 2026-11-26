@@ -1,0 +1,41 @@
+[
+  {
+    "question": "When is the payment due?",
+    "answer": "The payment is due on 2026-12-02.",
+    "quotes": [
+      {
+        "doc_name": "invoice_clean.pdf",
+        "page": 1,
+        "text": "Due date: 2026-12-02",
+        "status": "verified",
+        "note": ""
+      }
+    ]
+  },
+  {
+    "question": "What is the total amount due?",
+    "answer": "The total amount due is USD 359.10.",
+    "quotes": [
+      {
+        "doc_name": "invoice_clean.pdf",
+        "page": 1,
+        "text": "Total due: USD 359.10",
+        "status": "verified",
+        "note": ""
+      }
+    ]
+  },
+  {
+    "question": "Is there a late payment fee?",
+    "answer": "No. The invoice does not mention a late payment fee; it only states that payment is due by bank transfer within 30 days.",
+    "quotes": [
+      {
+        "doc_name": "invoice_clean.pdf",
+        "page": 1,
+        "text": "Payment by bank transfer within 30 days. Thank you for your business.",
+        "status": "verified",
+        "note": ""
+      }
+    ]
+  }
+]

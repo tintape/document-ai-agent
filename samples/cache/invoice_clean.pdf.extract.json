@@ -1,0 +1,93 @@
+{
+  "doc_name": "invoice_clean.pdf",
+  "doc_type": "invoice",
+  "data": {
+    "vendor": {
+      "value": "Blue Harbor Supplies Ltd.",
+      "confidence": "high",
+      "page": 1
+    },
+    "buyer": {
+      "value": "Northwind Cafe, 300 Alder St, Portland, OR 97204",
+      "confidence": "high",
+      "page": 1
+    },
+    "invoice_number": {
+      "value": "INV-2041",
+      "confidence": "high",
+      "page": 1
+    },
+    "invoice_date": {
+      "value": "2026-11-02",
+      "confidence": "high",
+      "page": 1
+    },
+    "due_date": {
+      "value": "2026-12-02",
+      "confidence": "high",
+      "page": 1
+    },
+    "currency": {
+      "value": "USD",
+      "confidence": "high",
+      "page": 1
+    },
+    "tax": {
+      "value": "USD 26.60",
+      "confidence": "high",
+      "page": 1
+    },
+    "total": {
+      "value": "USD 359.10",
+      "confidence": "high",
+      "page": 1
+    },
+    "line_items": [
+      {
+        "description": {
+          "value": "Espresso grinder service",
+          "confidence": "high",
+          "page": 1
+        },
+        "quantity": {
+          "value": "2",
+          "confidence": "high",
+          "page": 1
+        },
+        "unit_price": {
+          "value": "120.00",
+          "confidence": "high",
+          "page": 1
+        },
+        "amount": {
+          "value": "240.00",
+          "confidence": "high",
+          "page": 1
+        }
+      },
+      {
+        "description": {
+          "value": "Coffee beans, 1 kg bag",
+          "confidence": "high",
+          "page": 1
+        },
+        "quantity": {
+          "value": "5",
+          "confidence": "high",
+          "page": 1
+        },
+        "unit_price": {
+          "value": "18.50",
+          "confidence": "high",
+          "page": 1
+        },
+        "amount": {
+          "value": "92.50",
+          "confidence": "high",
+          "page": 1
+        }
+      }
+    ]
+  },
+  "flags": []
+}
