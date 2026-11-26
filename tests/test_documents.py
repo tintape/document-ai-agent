@@ -1,7 +1,10 @@
 import base64
+from types import SimpleNamespace
 
 import pytest
+from pypdf.errors import DependencyError
 
+from doc_agent import documents
 from doc_agent.config import Settings
 from doc_agent.documents import DocumentError, load_document
 from tests import factories
@@ -81,3 +84,26 @@ def test_too_many_pages(settings: Settings) -> None:
 def test_too_large(settings: Settings) -> None:
     with pytest.raises(DocumentError, match="10 MB"):
         load_document("big.pdf", b"%PDF" + b"0" * (10 * 1024 * 1024), settings)
+
+
+@pytest.mark.parametrize(
+    "error", [DependencyError("cryptography>=3.1 is required"), RecursionError()]
+)
+def test_reader_failures_become_friendly_errors(
+    settings: Settings, monkeypatch: pytest.MonkeyPatch, error: Exception
+) -> None:
+    def boom(*_args: object, **_kwargs: object) -> None:
+        raise error
+
+    monkeypatch.setattr(documents, "PdfReader", boom)
+    expected = "password" if isinstance(error, DependencyError) else "could not be read"
+    with pytest.raises(DocumentError, match=expected):
+        load_document("enc.pdf", factories.invoice_pdf(), settings)
+
+
+def test_pdf_with_no_pages_rejected(settings: Settings, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        documents, "PdfReader", lambda *_a, **_k: SimpleNamespace(is_encrypted=False, pages=[])
+    )
+    with pytest.raises(DocumentError, match="could not be read"):
+        load_document("empty.pdf", factories.invoice_pdf(), settings)

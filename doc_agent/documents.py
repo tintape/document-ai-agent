@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 from pypdf import PdfReader
-from pypdf.errors import PyPdfError
+from pypdf.errors import DependencyError, PyPdfError
 
 from doc_agent.config import Settings
 
@@ -59,11 +59,15 @@ def detect_media_type(data: bytes) -> MediaType | None:
 
 
 def _read_pdf(name: str, data: bytes, settings: Settings) -> tuple[str, ...]:
+    locked = DocumentError(f"“{name}” is password-protected. Please upload an unlocked copy.")
+    damaged = DocumentError(f"“{name}” could not be read as a PDF. It may be damaged.")
     try:
         reader = PdfReader(io.BytesIO(data))
         if reader.is_encrypted:
-            raise DocumentError(f"“{name}” is password-protected. Please upload an unlocked copy.")
+            raise locked
         page_count = len(reader.pages)
+        if page_count == 0:
+            raise damaged
         if page_count > settings.max_pages:
             raise DocumentError(
                 f"“{name}” has {page_count} pages. The demo accepts up to {settings.max_pages} pages."
@@ -71,9 +75,11 @@ def _read_pdf(name: str, data: bytes, settings: Settings) -> tuple[str, ...]:
         return tuple(page.extract_text() or "" for page in reader.pages)
     except DocumentError:
         raise
-    except (PyPdfError, ValueError, KeyError, TypeError, OSError) as err:
-        log.info("Unreadable PDF %s: %s", name, type(err).__name__)
-        raise DocumentError(f"“{name}” could not be read as a PDF. It may be damaged.") from err
+    except DependencyError as err:  # AES-encrypted PDFs fail while opening, before is_encrypted
+        raise locked from err
+    except (PyPdfError, Exception) as err:  # hostile PDFs can raise almost anything inside pypdf
+        log.info("Unreadable PDF: %s", type(err).__name__)
+        raise damaged from err
 
 
 def load_document(name: str, data: bytes, settings: Settings) -> LoadedDocument:
