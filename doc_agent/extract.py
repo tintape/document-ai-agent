@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+import re
 from dataclasses import dataclass
 
 from pydantic import BaseModel
@@ -18,6 +19,8 @@ from doc_agent.validate import Flag, validate_document, walk_fields
 EXTRACT_EFFORT = "low"
 EXTRACT_MAX_TOKENS = 4000
 ROW_KEYS = ("field", "value", "confidence", "page", "issue")
+FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+PLAIN_NUMBER = re.compile(r"[+-]?[\d.,]+")
 
 
 @dataclass(frozen=True)
@@ -79,11 +82,18 @@ def to_rows(result: ExtractionResult) -> list[dict[str, str]]:
     return group_rows + rows
 
 
+def csv_safe(cell: str) -> str:
+    """Stop spreadsheet apps from running a cell as a formula; plain numbers stay as they are."""
+    if cell.startswith(FORMULA_PREFIXES) and not PLAIN_NUMBER.fullmatch(cell):
+        return "'" + cell
+    return cell
+
+
 def to_csv(result: ExtractionResult) -> str:
     buf = io.StringIO()
     writer = csv.DictWriter(buf, fieldnames=ROW_KEYS, lineterminator="\n")
     writer.writeheader()
-    writer.writerows(to_rows(result))
+    writer.writerows({key: csv_safe(value) for key, value in row.items()} for row in to_rows(result))
     return buf.getvalue()
 
 

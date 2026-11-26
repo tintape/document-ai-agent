@@ -88,6 +88,23 @@ def test_csv_has_header_and_rows(text_doc: LoadedDocument, mismatched: InvoiceDa
     assert len(rows) == len(to_rows(result))
 
 
+@pytest.mark.parametrize(
+    "payload", ['=HYPERLINK("http://evil.example","x")', "+cmd", "@SUM(A1)", "\tx", "\rx", "-2+3"]
+)
+def test_csv_neutralizes_formulas(text_doc: LoadedDocument, payload: str) -> None:
+    invoice = make_invoice(vendor=fv(payload))
+    rows = list(csv.DictReader(io.StringIO(to_csv(extract(text_doc, "invoice", StubLLM(invoice), 0.0)))))
+    vendor = next(r for r in rows if r["field"] == "vendor")
+    assert vendor["value"] == "'" + payload
+
+
+@pytest.mark.parametrize("number", ["-15.00", "-1,200.50", "+3"])
+def test_csv_keeps_plain_numbers(text_doc: LoadedDocument, number: str) -> None:
+    invoice = make_invoice(tax=fv(number))
+    rows = list(csv.DictReader(io.StringIO(to_csv(extract(text_doc, "invoice", StubLLM(invoice), 0.0)))))
+    assert next(r for r in rows if r["field"] == "tax")["value"] == number
+
+
 def test_json_export(text_doc: LoadedDocument, mismatched: InvoiceData) -> None:
     result = extract(text_doc, "invoice", StubLLM(mismatched), session_spent=0.0)
     data = json.loads(to_json(result))
