@@ -161,6 +161,23 @@ def test_refusal_and_truncation(make_client, stop: str, kind: str) -> None:
     assert err.value.kind == kind
 
 
+@pytest.mark.parametrize("stop", ["refusal", "max_tokens"])
+def test_billed_failures_still_count_against_budget(make_client, store: BudgetStore, stop: str) -> None:
+    client, _ = make_client([ok(stop=stop, cost=0.0003)])
+    with pytest.raises(LLMError) as err:
+        call(client)
+    assert store.spent_on(DAY) == pytest.approx(0.0003)
+    assert err.value.call is not None
+    assert err.value.call.cost_usd == pytest.approx(0.0003)
+
+
+def test_unbilled_errors_carry_no_call(make_client) -> None:
+    client, _ = make_client([status_error(anthropic.AuthenticationError, 401)])
+    with pytest.raises(LLMError) as err:
+        call(client)
+    assert err.value.call is None
+
+
 def test_missing_parsed_output_is_bad_format(make_client) -> None:
     response = ok()
     response.parsed_output = None

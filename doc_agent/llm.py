@@ -43,9 +43,14 @@ MESSAGES: dict[str, str] = {
 
 
 class LLMError(Exception):
-    def __init__(self, kind: ErrorKind, message: str | None = None) -> None:
+    """User-facing failure. `call` is set when the failed request was still billed."""
+
+    def __init__(
+        self, kind: ErrorKind, message: str | None = None, call: CallInfo | None = None
+    ) -> None:
         super().__init__(message or MESSAGES[kind])
         self.kind: ErrorKind = kind
+        self.call = call
 
 
 class _SimulatedFailure(Exception):
@@ -169,12 +174,17 @@ class LLMClient:
         }
         started = time.monotonic()
         response, attempts = self._send(request, simulate_failures)
+        info = self._record(kind, response, attempts, time.monotonic() - started)
         if response.stop_reason == "refusal":
-            raise LLMError("refusal")
+            raise LLMError("refusal", call=info)
         if response.stop_reason == "max_tokens":
-            raise LLMError("truncated")
+            raise LLMError("truncated", call=info)
         if response.parsed_output is None:
-            raise LLMError("bad_format")
+            raise LLMError("bad_format", call=info)
+        return LLMResult(parsed=response.parsed_output, call=info)
+
+    def _record(self, kind: str, response: object, attempts: int, elapsed_s: float) -> CallInfo:
+        """Every answered request is billed, so its cost counts before we look at the answer."""
         cost, source = cost_from_usage(response.usage, self._settings)
         self._budget.add(cost, self._today())
         info = CallInfo(
@@ -185,7 +195,7 @@ class LLMClient:
             cost_usd=cost,
             cost_source=source,
             attempts=attempts,
-            duration_s=round(time.monotonic() - started, 2),
+            duration_s=round(elapsed_s, 2),
         )
         log.info("LLM call %s", info)
-        return LLMResult(parsed=response.parsed_output, call=info)
+        return info
