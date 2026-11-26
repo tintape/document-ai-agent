@@ -1,6 +1,6 @@
 # Document AI Agent
 
-Upload an invoice or a contract (PDF, scan or photo) and get its fields as a clean table. Then ask questions about it. The model's answers come with quotes, and **the app checks every quote against the document text itself** instead of trusting the model.
+Upload invoices or contracts (PDF, scan or photo) and get their fields as a clean table. Then ask questions about one document or several at once. The model's answers come with quotes, and **the app checks every quote against the document text itself** instead of trusting the model.
 
 It is a small demo, but it is built the way production AI features should be: costs are visible, failures are retried and explained, the model's output is validated by plain code, and spending is capped.
 
@@ -11,11 +11,12 @@ It is a small demo, but it is built the way production AI features should be: co
 ## What it shows
 
 - **Field extraction** for invoices (vendor, buyer, dates, line items, tax, total) and contracts (parties, term, fees, payment terms, termination notice, governing law). The answer shape is enforced with structured outputs.
-- **Checks that are not AI**: line items plus tax must add up to the total, the due date cannot be before the invoice date, required fields must be present, and anything the model was unsure about is flagged. Problem rows are highlighted.
-- **Verified quotes**: each quote in an answer is searched for in the PDF's own text. `verified` means it is really there (if the model named the wrong page, the real page is shown). `not found in document` means the model made it up. Scans and photos have no text layer, so their quotes are marked `unverified`.
+- **Checks that are not AI**: line items plus tax must add up to the total, the due date cannot be before the invoice date, required fields must be present, a tax rate given instead of a tax amount is caught, and anything the model was unsure about is flagged. Problem rows are highlighted.
+- **Verified quotes**: each quote in an answer is searched for in the PDF's own text. `verified` means it is really there (if the model named the wrong page, the real page is shown). `not found in document` means the model made it up. Scans, scanned pages and very short quotes have nothing to check against, so they are marked `unverified`. Questions can span several documents; each quote names the file it came from.
 - **Cost per request**, taken from the provider's billing data, plus the session and daily totals.
 - **Retries you can see**: rate limits, server errors and timeouts are retried with backoff, and the request log shows how many attempts each call took.
 - **Spend limits**: $0.10 per browser session and $1 per day by default. Failed requests that were still billed count too.
+- **No tracebacks for visitors**: broken, encrypted or mislabeled files, provider errors and anything unexpected end in a plain sentence; details go to the server log.
 - **Cached fallback**: the bundled samples have pre-computed results, so they still work without an API key, when the budget is used up, or when the API is down.
 - **CSV and JSON export**, with spreadsheet formula injection neutralized.
 
@@ -48,7 +49,7 @@ cp .env.example .env        # put your OpenRouter key in OPENROUTER_API_KEY
 uv run streamlit run app.py
 ```
 
-Without a key the app still runs: the samples show cached results. Set `DEMO_DEV=1` to get a "simulate API failure" switch for trying the retry logic.
+Without a key the app still runs: the samples show cached results. Runs on macOS and Linux (the daily budget file uses `fcntl` locks). Set `DEMO_DEV=1` to get a "simulate API failure" switch for trying the retry logic.
 
 ## Switch provider or model
 

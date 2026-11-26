@@ -35,7 +35,7 @@
       "page": 1
     },
     "termination_notice": {
-      "value": "30 days written notice",
+      "value": "30 days",
       "confidence": "high",
       "page": 2
     },

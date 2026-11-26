@@ -1,7 +1,7 @@
 [
   {
     "question": "How many hours of consulting were billed?",
-    "answer": "32 hours of consulting were billed: 12 hours of strategy consulting and 20 hours of implementation consulting. The 8 hours of post-launch support are not counted as consulting.",
+    "answer": "32 hours of consulting were billed: 12 hours of strategy consulting and 20 hours of implementation consulting. A separate 8 hours of post-launch support were also billed, but that is support rather than consulting.",
     "quotes": [
       {
         "doc_name": "invoice_multipage.pdf",
@@ -21,7 +21,7 @@
   },
   {
     "question": "Who issued this invoice?",
-    "answer": "Copperline Consulting GmbH issued this invoice.",
+    "answer": "Copperline Consulting GmbH, located in Hamburg, Germany, issued this invoice.",
     "quotes": [
       {
         "doc_name": "invoice_multipage.pdf",

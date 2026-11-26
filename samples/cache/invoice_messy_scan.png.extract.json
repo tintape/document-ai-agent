@@ -51,7 +51,7 @@
         },
         "quantity": {
           "value": "500",
-          "confidence": "high",
+          "confidence": "medium",
           "page": 1
         },
         "unit_price": {
@@ -73,7 +73,7 @@
         },
         "quantity": {
           "value": "40",
-          "confidence": "high",
+          "confidence": "medium",
           "page": 1
         },
         "unit_price": {
@@ -90,6 +90,18 @@
     ]
   },
   "flags": [
+    {
+      "field": "line_items[1].quantity",
+      "reason": "Model is not fully sure (medium confidence)"
+    },
+    {
+      "field": "line_items[2].quantity",
+      "reason": "Model is not fully sure (medium confidence)"
+    },
+    {
+      "field": "due_date",
+      "reason": "No due date found"
+    },
     {
       "field": "total",
       "reason": "Line items (180.00) plus tax (0) do not add up to the total (195.00)"

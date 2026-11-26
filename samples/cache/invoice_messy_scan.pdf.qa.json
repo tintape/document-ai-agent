@@ -14,7 +14,7 @@
   },
   {
     "question": "Is there a due date?",
-    "answer": "No. The invoice shows a date (2026-11-10) but does not contain a due date.",
+    "answer": "No. The invoice lists a date (2026-11-10) but does not contain a due date.",
     "quotes": [
       {
         "doc_name": "invoice_messy_scan.pdf",

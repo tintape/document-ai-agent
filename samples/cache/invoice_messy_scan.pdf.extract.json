@@ -91,6 +91,10 @@
   },
   "flags": [
     {
+      "field": "due_date",
+      "reason": "No due date found"
+    },
+    {
       "field": "total",
       "reason": "Line items (180.00) plus tax (0) do not add up to the total (195.00)"
     }
