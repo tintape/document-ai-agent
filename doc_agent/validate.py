@@ -68,25 +68,25 @@ def parse_date(text: str | None) -> date | None:
     return None
 
 
-def _walk(data: BaseModel, prefix: str = "") -> Iterator[tuple[str, FieldValue]]:
+def walk_fields(data: BaseModel, prefix: str = "") -> Iterator[tuple[str, FieldValue]]:
     for name, value in data:
         path = f"{prefix}{name}"
         if isinstance(value, FieldValue):
             yield path, value
         elif isinstance(value, BaseModel):
-            yield from _walk(value, f"{path}.")
+            yield from walk_fields(value, f"{path}.")
         elif isinstance(value, list):
             for i, entry in enumerate(value, start=1):
                 if isinstance(entry, FieldValue):
                     yield f"{path}[{i}]", entry
                 elif isinstance(entry, BaseModel):
-                    yield from _walk(entry, f"{path}[{i}].")
+                    yield from walk_fields(entry, f"{path}[{i}].")
 
 
 def _confidence_flags(data: BaseModel) -> list[Flag]:
     return [
         Flag(path, CONFIDENCE_REASONS[fv.confidence])
-        for path, fv in _walk(data)
+        for path, fv in walk_fields(data)
         if fv.confidence in CONFIDENCE_REASONS and fv.value is not None
     ]
 
