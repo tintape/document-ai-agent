@@ -5,6 +5,7 @@ Run: uv run streamlit run app.py   (DEMO_DEV=1 adds the "simulate API failure" s
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 from pathlib import Path
@@ -19,9 +20,11 @@ from doc_agent.config import Settings, load_settings
 from doc_agent.documents import DocumentError, LoadedDocument, load_document
 from doc_agent.extract import ExtractionResult, to_csv, to_json, to_rows
 from doc_agent.llm import LLMClient, utc_today
-from doc_agent.session import SessionLedger, run_extraction, run_question
+from doc_agent.session import UNEXPECTED_ERROR, SessionLedger, run_extraction, run_question
 
 ROOT = Path(__file__).resolve().parent
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+log = logging.getLogger("doc_agent.app")
 ISSUE_STYLE = "background-color: #fff3cd; color: #664d03"
 LOG_COLUMNS = [
     "kind",
@@ -213,6 +216,10 @@ def main() -> None:
         doc, sample, doc_type = pick_document(settings)
     except DocumentError as err:
         st.error(md_escape(str(err)))
+        doc, sample, doc_type = None, None, ""
+    except Exception:  # last resort: never show a traceback to a visitor
+        log.exception("Unexpected error while loading a document")
+        st.error(UNEXPECTED_ERROR)
         doc, sample, doc_type = None, None, ""
     spend_box = st.sidebar.container()
     simulate = dev_controls(settings)

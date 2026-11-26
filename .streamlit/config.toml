@@ -1,0 +1,10 @@
+[client]
+# Visitors never see tracebacks; details go to the server log.
+showErrorDetails = "none"
+
+[server]
+# Matches the app's own 10 MB limit, so big files are refused before they reach memory.
+maxUploadSize = 10
+
+[browser]
+gatherUsageStats = false

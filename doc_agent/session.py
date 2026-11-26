@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -13,8 +14,11 @@ from doc_agent.documents import LoadedDocument
 from doc_agent.extract import ExtractionResult, extract
 from doc_agent.llm import MESSAGES, CallInfo, LLMClient, LLMError
 
+log = logging.getLogger(__name__)
+
 R = TypeVar("R")
 FALLBACK_KINDS = frozenset({"no_key", "budget", "network", "overloaded", "rate_limit"})
+UNEXPECTED_ERROR = "Something went wrong on our side. Please try again in a moment."
 
 
 @dataclass(frozen=True)
@@ -58,6 +62,9 @@ def _run(
         return Outcome(None, ledger, error=str(err))
     except ValueError as err:
         return Outcome(None, ledger, error=str(err))
+    except Exception:  # last resort: a visitor must never see a traceback or internal details
+        log.exception("Unexpected error while handling a request")
+        return Outcome(None, ledger, error=UNEXPECTED_ERROR)
     return Outcome(result, ledger.add(getattr(result, "call", None)))
 
 

@@ -9,7 +9,7 @@ from doc_agent.documents import LoadedDocument, load_document
 from doc_agent.extract import ExtractionResult
 from doc_agent.llm import LLMError
 from doc_agent.schemas import AnswerData, Quote
-from doc_agent.session import SessionLedger, run_extraction, run_question
+from doc_agent.session import UNEXPECTED_ERROR, SessionLedger, run_extraction, run_question
 from tests import factories
 from tests.stubs import CALL, StubLLM
 from tests.test_validate import make_invoice
@@ -139,3 +139,23 @@ def test_bad_question_is_an_error_not_a_crash(doc: LoadedDocument, cache_dir: Pa
     assert outcome.result is None
     assert outcome.error == "Please type a question."
     assert llm.calls == 0
+
+
+class ExplodingLLM:
+    def call(self, **_kwargs: object) -> None:
+        raise RuntimeError("secret internal detail")
+
+
+def test_unexpected_errors_become_a_generic_message(doc: LoadedDocument, cache_dir: Path) -> None:
+    outcome = run_extraction(doc, "invoice", ExplodingLLM(), SessionLedger(), None, cache_dir)
+    assert outcome.result is None
+    assert outcome.error == UNEXPECTED_ERROR
+    assert "secret" not in outcome.error
+
+
+def test_unexpected_errors_do_not_use_cache(doc: LoadedDocument, cache_dir: Path) -> None:
+    outcome = run_question(
+        [doc], "What is the total?", ExplodingLLM(), SessionLedger(), SAMPLE, cache_dir
+    )
+    assert outcome.result is None
+    assert outcome.error == UNEXPECTED_ERROR
