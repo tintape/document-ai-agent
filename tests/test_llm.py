@@ -255,3 +255,13 @@ def test_build_sdk_uses_bearer_and_no_sdk_retries(settings: Settings) -> None:
 @pytest.mark.parametrize("kind", list(get_args(ErrorKind)))
 def test_every_error_kind_has_a_default_message(kind: str) -> None:
     assert str(LLMError(kind))
+
+
+def test_direct_anthropic_uses_x_api_key(tmp_path: Path) -> None:
+    settings = load_settings(
+        {"OPENROUTER_API_KEY": "sk-ant-test", "DOC_AGENT_BASE_URL": "https://api.anthropic.com"},
+        tmp_path,
+    )
+    sdk = build_sdk(settings)
+    assert sdk.api_key == "sk-ant-test"
+    assert sdk.auth_token is None

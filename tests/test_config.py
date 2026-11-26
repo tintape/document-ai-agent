@@ -44,3 +44,20 @@ def test_model_and_url_overrides(tmp_path: Path) -> None:
     )
     assert s.model == "claude-haiku-5-5"
     assert s.base_url == "https://api.anthropic.com"
+
+
+def test_all_settings_can_come_from_dotenv(tmp_path: Path) -> None:
+    (tmp_path / ".env").write_text(
+        "DEMO_DEV=1\nDOC_AGENT_MODEL=claude-haiku-5-5\nDOC_AGENT_BASE_URL=https://api.anthropic.com\n"
+    )
+    s = load_settings({}, tmp_path)
+    assert s.dev_mode is True
+    assert s.model == "claude-haiku-5-5"
+    assert s.base_url == "https://api.anthropic.com"
+
+
+def test_environment_beats_dotenv_for_every_setting(tmp_path: Path) -> None:
+    (tmp_path / ".env").write_text("DEMO_DEV=1\nDOC_AGENT_MODEL=from-file\n")
+    s = load_settings({"DEMO_DEV": "0", "DOC_AGENT_MODEL": "from-env"}, tmp_path)
+    assert s.dev_mode is False
+    assert s.model == "from-env"

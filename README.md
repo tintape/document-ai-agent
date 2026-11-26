@@ -52,12 +52,12 @@ Without a key the app still runs: the samples show cached results. Set `DEMO_DEV
 
 ## Switch provider or model
 
-The model is reached through OpenRouter's Anthropic-compatible endpoint with the official `anthropic` SDK. To call Anthropic directly or use another model, change three values:
+The model is reached through OpenRouter's Anthropic-compatible endpoint with the official `anthropic` SDK. To call Anthropic directly or use another model, change three values (in the environment or in `.env`):
 
 ```bash
 DOC_AGENT_BASE_URL=https://api.anthropic.com
 DOC_AGENT_MODEL=claude-haiku-5-5
-OPENROUTER_API_KEY=<your key>   # sent as a bearer token
+OPENROUTER_API_KEY=<your Anthropic key>   # sent as x-api-key for api.anthropic.com, as a bearer token otherwise
 ```
 
 ## Scaling up

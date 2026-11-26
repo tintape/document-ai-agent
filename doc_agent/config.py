@@ -54,13 +54,17 @@ def _clean(value: str | None) -> str | None:
 
 
 def load_settings(env: Mapping[str, str], project_root: Path) -> Settings:
+    """Real environment variables win; a local .env fills in whatever they leave unset."""
     dotenv = read_dotenv(project_root / ".env")
-    key = _clean(env.get(KEY_VAR)) or _clean(dotenv.get(KEY_VAR))
+
+    def get(name: str) -> str | None:
+        return _clean(env.get(name)) or _clean(dotenv.get(name))
+
     return Settings(
-        base_url=_clean(env.get("DOC_AGENT_BASE_URL")) or DEFAULT_BASE_URL,
-        model=_clean(env.get("DOC_AGENT_MODEL")) or DEFAULT_MODEL,
-        api_key=key,
+        base_url=get("DOC_AGENT_BASE_URL") or DEFAULT_BASE_URL,
+        model=get("DOC_AGENT_MODEL") or DEFAULT_MODEL,
+        api_key=get(KEY_VAR),
         budget_file=project_root / ".data" / "budget.json",
         cache_dir=project_root / "samples" / "cache",
-        dev_mode=env.get("DEMO_DEV", "").strip() == "1",
+        dev_mode=get("DEMO_DEV") == "1",
     )

@@ -9,6 +9,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from typing import Generic, Literal, TypeVar
+from urllib.parse import urlparse
 
 import anthropic
 from pydantic import BaseModel, ValidationError
@@ -32,6 +33,7 @@ ErrorKind = Literal[
     "budget",
     "no_key",
 ]
+ANTHROPIC_HOST = "api.anthropic.com"
 BACKOFF_BASE_S = 1.0
 BACKOFF_JITTER_S = 0.5
 MESSAGES: dict[str, str] = {
@@ -89,10 +91,12 @@ def utc_today() -> date:
 
 
 def build_sdk(settings: Settings) -> anthropic.Anthropic:
+    """OpenRouter takes the key as a bearer token; Anthropic's own API wants it as x-api-key."""
+    direct = urlparse(settings.base_url).hostname == ANTHROPIC_HOST
     return anthropic.Anthropic(
         base_url=settings.base_url,
-        auth_token=settings.api_key,
-        api_key=None,
+        auth_token=None if direct else settings.api_key,
+        api_key=settings.api_key if direct else None,
         max_retries=0,
         timeout=settings.timeout_s,
     )
