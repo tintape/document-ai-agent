@@ -9,7 +9,13 @@ from doc_agent.documents import LoadedDocument, load_document
 from doc_agent.extract import ExtractionResult
 from doc_agent.llm import LLMError
 from doc_agent.schemas import AnswerData, Quote
-from doc_agent.session import UNEXPECTED_ERROR, SessionLedger, run_extraction, run_question
+from doc_agent.session import (
+    UNEXPECTED_ERROR,
+    SessionLedger,
+    documents_key,
+    run_extraction,
+    run_question,
+)
 from tests import factories
 from tests.stubs import CALL, StubLLM
 from tests.test_validate import make_invoice
@@ -166,3 +172,17 @@ def test_revoked_key_on_sample_falls_back_to_cache(doc: LoadedDocument, cache_di
         doc, "invoice", StubLLM(error=LLMError("auth")), SessionLedger(), SAMPLE, cache_dir
     )
     assert outcome.result is not None and outcome.result.cached is True
+
+
+def test_documents_key_depends_on_content_not_name(settings: Settings) -> None:
+    invoice_bytes = factories.invoice_pdf()
+    a = load_document("same.pdf", invoice_bytes, settings)
+    b = load_document("same.pdf", factories.contract_pdf(), settings)
+    assert documents_key([a]) != documents_key([b])
+    assert documents_key([a]) == documents_key([load_document("same.pdf", invoice_bytes, settings)])
+
+
+def test_documents_key_depends_on_order_and_set(settings: Settings) -> None:
+    a = load_document("a.pdf", factories.invoice_pdf(), settings)
+    b = load_document("b.pdf", factories.contract_pdf(), settings)
+    assert documents_key([a, b]) != documents_key([a])

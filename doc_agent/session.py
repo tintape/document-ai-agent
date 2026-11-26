@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import logging
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -107,3 +108,11 @@ def run_question(
         hint = " Try one of the suggested questions — those have cached answers."
         return Outcome(None, outcome.ledger, error=outcome.error + hint)
     return outcome
+
+
+def documents_key(docs: Sequence[LoadedDocument]) -> str:
+    """Identity of the selected documents by content, so a different file with the same name resets results."""
+    digest = hashlib.sha256()
+    for doc in docs:
+        digest.update(hashlib.sha256(doc.data).digest())
+    return digest.hexdigest()
