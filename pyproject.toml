@@ -32,6 +32,9 @@ addopts = "-m 'not live'"
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+extend-exclude = ["docs"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
+# Long lines are left to `ruff format`; prompt text and docstrings are allowed to run long.
+ignore = ["E501"]
