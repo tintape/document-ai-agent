@@ -1,3 +1,4 @@
+import threading
 from datetime import date
 from pathlib import Path
 
@@ -45,6 +46,23 @@ def test_creates_parent_directory(tmp_path: Path) -> None:
     store = BudgetStore(tmp_path / "nested" / "b.json")
     store.add(0.1, DAY)
     assert (tmp_path / "nested" / "b.json").exists()
+
+
+def test_concurrent_adds_are_not_lost(tmp_path: Path) -> None:
+    path = tmp_path / "b.json"
+    workers, per_worker = 8, 25
+
+    def spend() -> None:
+        store = BudgetStore(path)
+        for _ in range(per_worker):
+            store.add(0.01, DAY)
+
+    threads = [threading.Thread(target=spend) for _ in range(workers)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    assert BudgetStore(path).spent_on(DAY) == pytest.approx(workers * per_worker * 0.01)
 
 
 def test_session_limit_checked_first(tmp_path: Path, settings: Settings) -> None:

@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import fcntl
 import json
 import logging
 import os
 import tempfile
+import threading
+from collections.abc import Iterator
+from contextlib import contextmanager
 from datetime import date
 from pathlib import Path
 from typing import Literal
@@ -15,6 +19,7 @@ from doc_agent.config import Settings
 log = logging.getLogger(__name__)
 
 BudgetScope = Literal["daily", "session"]
+_THREAD_LOCK = threading.Lock()
 
 
 class BudgetExceeded(Exception):
@@ -47,9 +52,22 @@ class BudgetStore:
         return spent if stored_day == day.isoformat() else 0.0
 
     def add(self, amount: float, day: date) -> float:
-        total = self.spent_on(day) + amount
-        self._write({"day": day.isoformat(), "spent_usd": total})
-        return total
+        """Read-modify-write under a thread lock plus an OS file lock, so no spend is lost."""
+        with _THREAD_LOCK, self._file_lock():
+            total = self.spent_on(day) + amount
+            self._write({"day": day.isoformat(), "spent_usd": total})
+            return total
+
+    @contextmanager
+    def _file_lock(self) -> Iterator[None]:
+        self._path.parent.mkdir(parents=True, exist_ok=True)
+        lock_path = self._path.with_suffix(self._path.suffix + ".lock")
+        with open(lock_path, "a+", encoding="utf-8") as handle:
+            fcntl.flock(handle, fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(handle, fcntl.LOCK_UN)
 
     def _write(self, payload: dict[str, object]) -> None:
         self._path.parent.mkdir(parents=True, exist_ok=True)
