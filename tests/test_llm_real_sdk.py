@@ -46,7 +46,9 @@ def real_sdk(body: dict, seen: list[dict] | None = None) -> anthropic.Anthropic:
 
 
 def run(settings: Settings, store: BudgetStore, body: dict, seen: list[dict] | None = None):
-    client = LLMClient(settings, store, sdk=real_sdk(body, seen), sleep=lambda _: None, today=lambda: DAY)
+    client = LLMClient(
+        settings, store, sdk=real_sdk(body, seen), sleep=lambda _: None, today=lambda: DAY
+    )
     return client.call(
         kind="ask",
         content=[{"type": "text", "text": "q"}],
