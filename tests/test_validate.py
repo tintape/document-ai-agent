@@ -163,3 +163,43 @@ def test_contract_missing_signing_date() -> None:
 def test_unknown_doc_type_rejected() -> None:
     with pytest.raises(ValueError):
         validate_document("receipt", make_invoice())
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("Nov 27, 2026", date(2026, 11, 27)),
+        ("Nov. 27, 2026", date(2026, 11, 27)),
+        ("27/11/2026", date(2026, 11, 27)),
+        ("27-Nov-2026", date(2026, 11, 27)),
+        ("2026/11/27", date(2026, 11, 27)),
+        ("27.11.26", date(2026, 11, 27)),
+    ],
+)
+def test_parse_more_real_world_dates(text: str, expected: date) -> None:
+    assert parse_date(text) == expected
+
+
+def test_ambiguous_slash_dates_do_not_trigger_order_flag() -> None:
+    invoice = make_invoice(invoice_date=fv("03/04/2026"), due_date=fv("02/05/2026"))
+    flags = validate_document("invoice", invoice)
+    assert not any(f.field == "due_date" for f in flags)
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("Rs. 1,200", Decimal("1200")),
+        ("approx. 500", Decimal("500")),
+        ("1.200 €", Decimal("1200")),
+        ("€ 1.234", Decimal("1234")),
+        ("1'234.50", Decimal("1234.50")),
+        ("12,5", Decimal("12.5")),
+        ("5,000", Decimal("5000")),
+        ("5,00", Decimal("5.00")),
+        ("1.234.567", Decimal("1234567")),
+        ("US$1,200.00", Decimal("1200.00")),
+    ],
+)
+def test_parse_amount_real_world(text: str, expected: Decimal) -> None:
+    assert parse_amount(text) == expected

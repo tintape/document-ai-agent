@@ -73,7 +73,7 @@ def test_out_of_range_page_with_invented_quote_not_found(
 
 
 def test_empty_quote_not_verified(contract: LoadedDocument) -> None:
-    assert check_quote(Quote(document=1, page=1, text="  "), [contract]).status == "not_found"
+    assert check_quote(Quote(document=1, page=1, text="  "), [contract]).status == "unverified"
 
 
 def test_scan_is_unverified(scan: LoadedDocument) -> None:
@@ -124,3 +124,25 @@ def test_ask_sends_all_docs_and_checks_quotes(
     assert [q.status for q in result.quotes] == ["verified", "not_found"]
     assert result.cached is False
     assert result.call is not None and result.call.kind == "ask"
+
+
+def test_normalize_folds_ligatures_and_soft_hyphens() -> None:
+    assert normalize("ﬁnal pay­ment") == normalize("final payment")
+
+
+def test_quote_from_scanned_page_of_mixed_pdf_is_unverified(settings: Settings) -> None:
+    mixed = LoadedDocument(
+        name="mixed.pdf",
+        media_type="application/pdf",
+        data=b"%PDF",
+        page_texts=("Termination notice: 30 days in writing. Governing law: Oregon.", ""),
+        page_count=2,
+    )
+    q = check_quote(Quote(document=1, page=2, text="Signed by Maya Ortiz"), [mixed])
+    assert q.status == "unverified"
+    assert "scan" in q.note
+
+
+def test_tiny_quote_is_not_verified(contract: LoadedDocument) -> None:
+    q = check_quote(Quote(document=1, page=2, text="e"), [contract])
+    assert q.status != "verified"

@@ -12,7 +12,10 @@ from pydantic import BaseModel
 
 from doc_agent.schemas import ContractData, FieldValue, InvoiceData
 
-DATE_FORMATS = ("%Y-%m-%d", "%d.%m.%Y", "%m/%d/%Y", "%d %B %Y", "%B %d, %Y", "%d %b %Y")
+DATE_FORMATS = (
+    "%Y-%m-%d", "%Y/%m/%d", "%d.%m.%Y", "%d.%m.%y", "%m/%d/%Y", "%d/%m/%Y", "%d-%b-%Y",
+    "%d %B %Y", "%d %b %Y", "%B %d, %Y", "%b %d, %Y", "%b. %d, %Y",
+)  # fmt: skip
 CONFIDENCE_REASONS = {
     "medium": "Model is not fully sure (medium confidence)",
     "low": "Model is not sure (low confidence)",
@@ -22,7 +25,8 @@ SUM_TOLERANCE_ABS = Decimal("0.01")
 SUM_TOLERANCE_REL = Decimal("0.005")
 INVOICE_REQUIRED = ("vendor", "invoice_number", "invoice_date", "total")
 CONTRACT_REQUIRED = ("signing_date",)
-_NOT_NUMBER = re.compile(r"[^\d.,\-]")
+_NUMBER = re.compile(r"-?\d(?:[\d.,'\s ]*\d)?")
+_SLASH_DATE = re.compile(r"(\d{1,2})/(\d{1,2})/\d{4}")
 
 
 @dataclass(frozen=True)
@@ -36,23 +40,23 @@ def _normalize_separators(text: str) -> str:
         decimal_sep = "," if text.rfind(",") > text.rfind(".") else "."
         thousands = "." if decimal_sep == "," else ","
         return text.replace(thousands, "").replace(decimal_sep, ".")
-    if "," in text:
-        head, _, tail = text.rpartition(",")
-        is_decimal = text.count(",") == 1 and len(tail) in (1, 2)
-        return f"{head}.{tail}" if is_decimal else text.replace(",", "")
-    if text.count(".") > 1:
-        return text.replace(".", "")
+    for sep in (",", "."):
+        if sep not in text:
+            continue
+        head, _, tail = text.rpartition(sep)
+        is_thousands = text.count(sep) > 1 or len(tail) == 3
+        return text.replace(sep, "") if is_thousands else f"{head.replace(sep, '')}.{tail}"
     return text
 
 
 def parse_amount(text: str | None) -> Decimal | None:
-    if not text:
+    """Parse the first number in the text: '$1,200', '1.234,50 €', 'Rs. 1,200', "1'234.50"."""
+    match = _NUMBER.search(text or "")
+    if match is None:
         return None
-    cleaned = _NOT_NUMBER.sub("", text)
-    if not any(ch.isdigit() for ch in cleaned):
-        return None
+    core = re.sub(r"[\s' ]", "", match.group())
     try:
-        return Decimal(_normalize_separators(cleaned))
+        return Decimal(_normalize_separators(core))
     except InvalidOperation:
         return None
 
@@ -66,6 +70,15 @@ def parse_date(text: str | None) -> date | None:
         except ValueError:
             continue
     return None
+
+
+def is_ambiguous_date(text: str | None) -> bool:
+    """'03/04/2026' reads as March 4 or 3 April: don't build checks on its order."""
+    match = _SLASH_DATE.fullmatch((text or "").strip())
+    if match is None:
+        return False
+    first, second = int(match.group(1)), int(match.group(2))
+    return first != second and first <= 12 and second <= 12
 
 
 def walk_fields(data: BaseModel, prefix: str = "") -> Iterator[tuple[str, FieldValue]]:
@@ -106,7 +119,10 @@ def _date_flags(invoice: InvoiceData) -> list[Flag]:
         if raw and parsed[name] is None:
             flags.append(Flag(name, "Date is not in a recognised format"))
     issued, due = parsed["invoice_date"], parsed["due_date"]
-    if issued and due and due < issued:
+    ambiguous = any(
+        is_ambiguous_date(getattr(invoice, n).value) for n in ("invoice_date", "due_date")
+    )
+    if issued and due and not ambiguous and due < issued:
         flags.append(Flag("due_date", "Due date is before the invoice date"))
     return flags
 
