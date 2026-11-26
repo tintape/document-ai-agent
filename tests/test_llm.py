@@ -28,9 +28,10 @@ def ok(
     parsed: object = None, cost: float | None = 0.0002, stop: str = "end_turn"
 ) -> SimpleNamespace:
     extra = {} if cost is None else {"cost": cost}
+    answer = parsed if parsed is not None else AnswerData(answer="a", quotes=[])
     return SimpleNamespace(
         stop_reason=stop,
-        parsed_output=parsed if parsed is not None else AnswerData(answer="a", quotes=[]),
+        content=[SimpleNamespace(type="text", text=answer.model_dump_json())],
         usage=SimpleNamespace(input_tokens=100, output_tokens=10, model_extra=extra),
         model="anthropic/claude-haiku-5.5",
     )
@@ -41,7 +42,7 @@ class FakeSDK:
         self._outcomes = list(outcomes)
         self.calls = 0
         self.last_kwargs: dict = {}
-        self.messages = SimpleNamespace(parse=self._parse)
+        self.messages = SimpleNamespace(create=self._parse)
 
     def _parse(self, **kwargs: object) -> object:
         self.calls += 1
@@ -95,8 +96,10 @@ def test_success_returns_parsed_and_cost(make_client) -> None:
     assert result.call.kind == "ask"
     assert (result.call.input_tokens, result.call.output_tokens) == (100, 10)
     assert fake.last_kwargs["model"] == "anthropic/claude-haiku-5.5"
-    assert fake.last_kwargs["output_config"] == {"effort": "medium"}
-    assert fake.last_kwargs["output_format"] is AnswerData
+    assert fake.last_kwargs["output_config"] == {
+        "effort": "medium",
+        "format": {"type": "json_schema", "schema": AnswerData.model_json_schema()},
+    }
     assert fake.last_kwargs["max_tokens"] == 2000
     assert fake.last_kwargs["messages"] == [
         {"role": "user", "content": [{"type": "text", "text": "q"}]}
@@ -187,9 +190,9 @@ def test_unbilled_errors_carry_no_call(make_client) -> None:
     assert err.value.call is None
 
 
-def test_missing_parsed_output_is_bad_format(make_client) -> None:
+def test_missing_text_is_bad_format(make_client) -> None:
     response = ok()
-    response.parsed_output = None
+    response.content = []
     client, _ = make_client([response])
     with pytest.raises(LLMError) as err:
         call(client)

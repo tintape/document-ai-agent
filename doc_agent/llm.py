@@ -11,7 +11,7 @@ from datetime import UTC, date, datetime
 from typing import Generic, Literal, TypeVar
 
 import anthropic
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from doc_agent.budget import BudgetExceeded, BudgetStore, check_budget
 from doc_agent.config import Settings
@@ -98,6 +98,18 @@ def build_sdk(settings: Settings) -> anthropic.Anthropic:
     )
 
 
+def output_format(schema: type[BaseModel]) -> dict:
+    """Structured-output format. The schema models forbid extra fields, so the JSON schema is strict."""
+    return {"type": "json_schema", "schema": schema.model_json_schema()}
+
+
+def _first_text(response: object) -> str:
+    for block in getattr(response, "content", None) or []:
+        if getattr(block, "type", None) == "text":
+            return block.text
+    return ""
+
+
 def _retry_kind(err: Exception) -> ErrorKind | None:
     """Kind to report if retries run out, or None when the error must not be retried."""
     if isinstance(err, anthropic.RateLimitError):
@@ -151,7 +163,7 @@ class LLMClient:
             try:
                 if attempt <= simulate_failures:
                     raise _SimulatedFailure()
-                return sdk.messages.parse(**request), attempt
+                return sdk.messages.create(**request), attempt
             except (anthropic.APIError, _SimulatedFailure) as err:
                 kind = _retry_kind(err)
                 if kind is None:
@@ -179,20 +191,23 @@ class LLMClient:
         request = {
             "model": self._settings.model,
             "max_tokens": max_tokens,
-            "output_config": {"effort": effort},
-            "output_format": schema,
+            "output_config": {"effort": effort, "format": output_format(schema)},
             "messages": [{"role": "user", "content": content}],
         }
         started = time.monotonic()
         response, attempts = self._send(request, simulate_failures)
+        if getattr(response, "usage", None) is None:
+            raise LLMError("bad_request")  # an error body the provider sent with HTTP 200
         info = self._record(kind, response, attempts, time.monotonic() - started)
         if response.stop_reason == "refusal":
             raise LLMError("refusal", call=info)
         if response.stop_reason == "max_tokens":
             raise LLMError("truncated", call=info)
-        if response.parsed_output is None:
-            raise LLMError("bad_format", call=info)
-        return LLMResult(parsed=response.parsed_output, call=info)
+        try:
+            parsed = schema.model_validate_json(_first_text(response))
+        except ValidationError as err:
+            raise LLMError("bad_format", call=info) from err
+        return LLMResult(parsed=parsed, call=info)
 
     def _record(self, kind: str, response: object, attempts: int, elapsed_s: float) -> CallInfo:
         """Every answered request is billed, so its cost counts before we look at the answer."""
