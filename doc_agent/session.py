@@ -17,7 +17,7 @@ from doc_agent.llm import MESSAGES, CallInfo, LLMClient, LLMError
 log = logging.getLogger(__name__)
 
 R = TypeVar("R")
-FALLBACK_KINDS = frozenset({"no_key", "budget", "network", "overloaded", "rate_limit"})
+FALLBACK_KINDS = frozenset({"no_key", "auth", "budget", "network", "overloaded", "rate_limit"})
 UNEXPECTED_ERROR = "Something went wrong on our side. Please try again in a moment."
 
 

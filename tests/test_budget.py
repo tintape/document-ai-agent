@@ -85,3 +85,10 @@ def test_under_limits_passes(tmp_path: Path, settings: Settings) -> None:
     store = BudgetStore(tmp_path / "b.json")
     store.add(0.5, DAY)
     check_budget(store, settings, session_spent=0.05, day=DAY)
+
+
+@pytest.mark.parametrize("spent", ["NaN", "-5", "Infinity"])
+def test_tampered_spend_is_treated_as_unreadable(tmp_path: Path, spent: str) -> None:
+    path = tmp_path / "b.json"
+    path.write_text(f'{{"day": "2026-11-27", "spent_usd": {spent}}}')
+    assert BudgetStore(path).spent_on(DAY) == 0.0

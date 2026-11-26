@@ -89,9 +89,9 @@ def test_upload_does_not_use_cache(doc: LoadedDocument, cache_dir: Path) -> None
     assert outcome.error == str(LLMError("budget"))
 
 
-def test_auth_error_is_not_hidden_by_cache(doc: LoadedDocument, cache_dir: Path) -> None:
+def test_auth_error_on_upload_is_shown(doc: LoadedDocument, cache_dir: Path) -> None:
     outcome = run_extraction(
-        doc, "invoice", StubLLM(error=LLMError("auth")), SessionLedger(), SAMPLE, cache_dir
+        doc, "invoice", StubLLM(error=LLMError("auth")), SessionLedger(), None, cache_dir
     )
     assert outcome.result is None
     assert outcome.error
@@ -159,3 +159,10 @@ def test_unexpected_errors_do_not_use_cache(doc: LoadedDocument, cache_dir: Path
     )
     assert outcome.result is None
     assert outcome.error == UNEXPECTED_ERROR
+
+
+def test_revoked_key_on_sample_falls_back_to_cache(doc: LoadedDocument, cache_dir: Path) -> None:
+    outcome = run_extraction(
+        doc, "invoice", StubLLM(error=LLMError("auth")), SessionLedger(), SAMPLE, cache_dir
+    )
+    assert outcome.result is not None and outcome.result.cached is True

@@ -34,6 +34,8 @@ ErrorKind = Literal[
     "no_key",
 ]
 ANTHROPIC_HOST = "api.anthropic.com"
+# OpenRouter: try Anthropic's own endpoint first (lowest listed price), others only as a fallback.
+OPENROUTER_PROVIDER_PREFERENCE = {"order": ["anthropic"], "allow_fallbacks": True}
 BACKOFF_BASE_S = 1.0
 BACKOFF_JITTER_S = 0.5
 MESSAGES: dict[str, str] = {
@@ -90,9 +92,13 @@ def utc_today() -> date:
     return datetime.now(UTC).date()
 
 
+def _is_direct_anthropic(settings: Settings) -> bool:
+    return urlparse(settings.base_url).hostname == ANTHROPIC_HOST
+
+
 def build_sdk(settings: Settings) -> anthropic.Anthropic:
     """OpenRouter takes the key as a bearer token; Anthropic's own API wants it as x-api-key."""
-    direct = urlparse(settings.base_url).hostname == ANTHROPIC_HOST
+    direct = _is_direct_anthropic(settings)
     return anthropic.Anthropic(
         base_url=settings.base_url,
         auth_token=None if direct else settings.api_key,
@@ -198,6 +204,8 @@ class LLMClient:
             "output_config": {"effort": effort, "format": output_format(schema)},
             "messages": [{"role": "user", "content": content}],
         }
+        if not _is_direct_anthropic(self._settings):
+            request["extra_body"] = {"provider": OPENROUTER_PROVIDER_PREFERENCE}
         started = time.monotonic()
         response, attempts = self._send(request, simulate_failures)
         if getattr(response, "usage", None) is None:

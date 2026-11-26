@@ -265,3 +265,22 @@ def test_direct_anthropic_uses_x_api_key(tmp_path: Path) -> None:
     sdk = build_sdk(settings)
     assert sdk.api_key == "sk-ant-test"
     assert sdk.auth_token is None
+
+
+def test_openrouter_requests_prefer_the_anthropic_provider(make_client) -> None:
+    client, fake = make_client([ok()])
+    call(client)
+    assert fake.last_kwargs["extra_body"] == {
+        "provider": {"order": ["anthropic"], "allow_fallbacks": True}
+    }
+
+
+def test_direct_anthropic_requests_have_no_provider_routing(
+    tmp_path: Path, store: BudgetStore
+) -> None:
+    settings = load_settings(
+        {"OPENROUTER_API_KEY": "k", "DOC_AGENT_BASE_URL": "https://api.anthropic.com"}, tmp_path
+    )
+    fake = FakeSDK([ok()])
+    call(LLMClient(settings, store, sdk=fake, sleep=lambda _: None, today=lambda: DAY))
+    assert "extra_body" not in fake.last_kwargs

@@ -21,6 +21,7 @@ CONFIDENCE_REASONS = {
     "low": "Model is not sure (low confidence)",
 }
 MISSING = "Required field is missing"
+UNREADABLE_DATE = "Date is not in a recognised format"
 SUM_TOLERANCE_ABS = Decimal("0.01")
 SUM_TOLERANCE_REL = Decimal("0.005")
 INVOICE_REQUIRED = ("vendor", "invoice_number", "invoice_date", "total")
@@ -117,7 +118,9 @@ def _date_flags(invoice: InvoiceData) -> list[Flag]:
         raw = getattr(invoice, name).value
         parsed[name] = parse_date(raw)
         if raw and parsed[name] is None:
-            flags.append(Flag(name, "Date is not in a recognised format"))
+            flags.append(Flag(name, UNREADABLE_DATE))
+    if not (invoice.due_date.value or "").strip():
+        flags.append(Flag("due_date", "No due date found"))
     issued, due = parsed["invoice_date"], parsed["due_date"]
     ambiguous = any(
         is_ambiguous_date(getattr(invoice, n).value) for n in ("invoice_date", "due_date")
@@ -125,6 +128,21 @@ def _date_flags(invoice: InvoiceData) -> list[Flag]:
     if issued and due and not ambiguous and due < issued:
         flags.append(Flag("due_date", "Due date is before the invoice date"))
     return flags
+
+
+def _tax(invoice: InvoiceData) -> tuple[Decimal, list[Flag]]:
+    """Tax amount for the sum check: a rate like '20%' or unreadable text counts as 0 and is flagged."""
+    raw = (invoice.tax.value or "").strip()
+    if not raw:
+        return Decimal("0"), []
+    if "%" in raw:
+        return Decimal("0"), [
+            Flag("tax", "Tax shows a rate, not an amount, so it was left out of the sum")
+        ]
+    amount = parse_amount(raw)
+    if amount is None:
+        return Decimal("0"), [Flag("tax", "Tax is not a readable amount")]
+    return amount, []
 
 
 def _sum_flags(invoice: InvoiceData) -> list[Flag]:
@@ -135,18 +153,15 @@ def _sum_flags(invoice: InvoiceData) -> list[Flag]:
         return []
     amounts = [parse_amount(item.amount.value) for item in invoice.line_items]
     if any(amount is None for amount in amounts):
-        return [
-            Flag(
-                "line_items", "Some line item amounts are not readable, so the sum was not checked"
-            )
-        ]
-    tax = parse_amount(invoice.tax.value) or Decimal("0")
+        reason = "Some line item amounts are not readable, so the sum was not checked"
+        return [Flag("line_items", reason)]
+    tax, flags = _tax(invoice)
     items_sum = sum(amounts, Decimal("0"))
     tolerance = max(SUM_TOLERANCE_ABS, SUM_TOLERANCE_REL * abs(total))
     if abs(items_sum + tax - total) <= tolerance:
-        return []
+        return flags
     reason = f"Line items ({items_sum}) plus tax ({tax}) do not add up to the total ({total})"
-    return [Flag("total", reason)]
+    return [*flags, Flag("total", reason)]
 
 
 def _invoice_flags(invoice: InvoiceData) -> list[Flag]:
@@ -158,6 +173,9 @@ def _contract_flags(contract: ContractData) -> list[Flag]:
     named = [p for p in contract.parties if (p.value or "").strip()]
     if len(named) < 2:
         flags.append(Flag("parties", "Expected at least two parties"))
+    signed = contract.signing_date.value
+    if signed and parse_date(signed) is None:
+        flags.append(Flag("signing_date", UNREADABLE_DATE))
     return flags
 
 

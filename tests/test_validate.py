@@ -203,3 +203,24 @@ def test_ambiguous_slash_dates_do_not_trigger_order_flag() -> None:
 )
 def test_parse_amount_real_world(text: str, expected: Decimal) -> None:
     assert parse_amount(text) == expected
+
+
+def test_tax_rate_instead_of_amount_is_flagged_not_summed() -> None:
+    flags = validate_document("invoice", make_invoice(tax=fv("20%")))
+    assert any(f.field == "tax" and "rate" in f.reason for f in flags)
+    assert not any(f.field == "total" for f in flags)
+
+
+def test_unreadable_tax_is_flagged() -> None:
+    flags = validate_document("invoice", make_invoice(tax=fv("see note")))
+    assert any(f.field == "tax" for f in flags)
+
+
+def test_missing_due_date_gets_a_soft_flag() -> None:
+    flags = validate_document("invoice", make_invoice(due_date=fv(None, page=None)))
+    assert Flag("due_date", "No due date found") in flags
+
+
+def test_contract_signing_date_format_checked() -> None:
+    flags = validate_document("contract", make_contract(signing_date=fv("sometime in autumn")))
+    assert any(f.field == "signing_date" for f in flags)

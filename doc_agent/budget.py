@@ -5,6 +5,7 @@ from __future__ import annotations
 import fcntl
 import json
 import logging
+import math
 import os
 import tempfile
 import threading
@@ -40,7 +41,8 @@ class BudgetStore:
         try:
             data = json.loads(self._path.read_text(encoding="utf-8"))
             day, spent = data["day"], data["spent_usd"]
-            if not isinstance(day, str) or not isinstance(spent, int | float):
+            valid_spent = isinstance(spent, int | float) and 0 <= spent < math.inf
+            if not isinstance(day, str) or not valid_spent:
                 raise ValueError("unexpected budget file shape")
             return day, float(spent)
         except (OSError, ValueError, KeyError, TypeError):
