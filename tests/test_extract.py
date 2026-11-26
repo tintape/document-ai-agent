@@ -34,7 +34,9 @@ def test_extract_runs_validation(text_doc: LoadedDocument, mismatched: InvoiceDa
     assert any(f.field == "total" for f in result.flags)
 
 
-def test_extract_sends_document_and_prompt(text_doc: LoadedDocument, mismatched: InvoiceData) -> None:
+def test_extract_sends_document_and_prompt(
+    text_doc: LoadedDocument, mismatched: InvoiceData
+) -> None:
     llm = StubLLM(mismatched)
     extract(text_doc, "invoice", llm, session_spent=0.03, simulate_failures=1)
     assert llm.last["schema"] is InvoiceData
@@ -76,7 +78,11 @@ def test_rows_show_group_level_issues(text_doc: LoadedDocument) -> None:
 
 def test_empty_values_render_blank(text_doc: LoadedDocument) -> None:
     invoice = make_invoice(buyer=fv(None, page=None))
-    buyer = next(r for r in to_rows(extract(text_doc, "invoice", StubLLM(invoice), 0.0)) if r["field"] == "buyer")
+    buyer = next(
+        r
+        for r in to_rows(extract(text_doc, "invoice", StubLLM(invoice), 0.0))
+        if r["field"] == "buyer"
+    )
     assert buyer["value"] == "" and buyer["page"] == ""
 
 
@@ -93,7 +99,9 @@ def test_csv_has_header_and_rows(text_doc: LoadedDocument, mismatched: InvoiceDa
 )
 def test_csv_neutralizes_formulas(text_doc: LoadedDocument, payload: str) -> None:
     invoice = make_invoice(vendor=fv(payload))
-    rows = list(csv.DictReader(io.StringIO(to_csv(extract(text_doc, "invoice", StubLLM(invoice), 0.0)))))
+    rows = list(
+        csv.DictReader(io.StringIO(to_csv(extract(text_doc, "invoice", StubLLM(invoice), 0.0))))
+    )
     vendor = next(r for r in rows if r["field"] == "vendor")
     assert vendor["value"] == "'" + payload
 
@@ -101,7 +109,9 @@ def test_csv_neutralizes_formulas(text_doc: LoadedDocument, payload: str) -> Non
 @pytest.mark.parametrize("number", ["-15.00", "-1,200.50", "+3"])
 def test_csv_keeps_plain_numbers(text_doc: LoadedDocument, number: str) -> None:
     invoice = make_invoice(tax=fv(number))
-    rows = list(csv.DictReader(io.StringIO(to_csv(extract(text_doc, "invoice", StubLLM(invoice), 0.0)))))
+    rows = list(
+        csv.DictReader(io.StringIO(to_csv(extract(text_doc, "invoice", StubLLM(invoice), 0.0))))
+    )
     assert next(r for r in rows if r["field"] == "tax")["value"] == number
 
 

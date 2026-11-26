@@ -92,7 +92,9 @@ def _confidence_flags(data: BaseModel) -> list[Flag]:
 
 
 def _missing_flags(data: BaseModel, required: tuple[str, ...]) -> list[Flag]:
-    return [Flag(name, MISSING) for name in required if not (getattr(data, name).value or "").strip()]
+    return [
+        Flag(name, MISSING) for name in required if not (getattr(data, name).value or "").strip()
+    ]
 
 
 def _date_flags(invoice: InvoiceData) -> list[Flag]:
@@ -117,7 +119,11 @@ def _sum_flags(invoice: InvoiceData) -> list[Flag]:
         return []
     amounts = [parse_amount(item.amount.value) for item in invoice.line_items]
     if any(amount is None for amount in amounts):
-        return [Flag("line_items", "Some line item amounts are not readable, so the sum was not checked")]
+        return [
+            Flag(
+                "line_items", "Some line item amounts are not readable, so the sum was not checked"
+            )
+        ]
     tax = parse_amount(invoice.tax.value) or Decimal("0")
     items_sum = sum(amounts, Decimal("0"))
     tolerance = max(SUM_TOLERANCE_ABS, SUM_TOLERANCE_REL * abs(total))

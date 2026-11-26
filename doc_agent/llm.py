@@ -21,8 +21,16 @@ log = logging.getLogger(__name__)
 
 T = TypeVar("T", bound=BaseModel)
 ErrorKind = Literal[
-    "auth", "rate_limit", "overloaded", "network", "refusal", "truncated",
-    "bad_request", "bad_format", "budget", "no_key",
+    "auth",
+    "rate_limit",
+    "overloaded",
+    "network",
+    "refusal",
+    "truncated",
+    "bad_request",
+    "bad_format",
+    "budget",
+    "no_key",
 ]
 BACKOFF_BASE_S = 1.0
 BACKOFF_JITTER_S = 0.5
@@ -151,7 +159,9 @@ class LLMClient:
                 if attempt == self._settings.max_attempts:
                     raise LLMError(kind) from err
                 log.info("Retryable error (%s), attempt %d", type(err).__name__, attempt)
-                self._sleep(BACKOFF_BASE_S * 2 ** (attempt - 1) + random.uniform(0, BACKOFF_JITTER_S))
+                self._sleep(
+                    BACKOFF_BASE_S * 2 ** (attempt - 1) + random.uniform(0, BACKOFF_JITTER_S)
+                )
         raise LLMError("network")  # unreachable: the loop always returns or raises
 
     def call(

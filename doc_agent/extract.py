@@ -93,7 +93,9 @@ def to_csv(result: ExtractionResult) -> str:
     buf = io.StringIO()
     writer = csv.DictWriter(buf, fieldnames=ROW_KEYS, lineterminator="\n")
     writer.writeheader()
-    writer.writerows({key: csv_safe(value) for key, value in row.items()} for row in to_rows(result))
+    writer.writerows(
+        {key: csv_safe(value) for key, value in row.items()} for row in to_rows(result)
+    )
     return buf.getvalue()
 
 

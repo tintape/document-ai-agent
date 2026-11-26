@@ -55,7 +55,9 @@ def test_out_of_range_document_not_found(contract: LoadedDocument, document: int
 
 
 @pytest.mark.parametrize("page", [9, 0, -3])
-def test_out_of_range_page_with_real_quote_is_corrected(contract: LoadedDocument, page: int) -> None:
+def test_out_of_range_page_with_real_quote_is_corrected(
+    contract: LoadedDocument, page: int
+) -> None:
     q = check_quote(Quote(document=1, page=page, text="Termination notice"), [contract])
     assert q.status == "verified"
     assert q.page == 2
@@ -63,7 +65,9 @@ def test_out_of_range_page_with_real_quote_is_corrected(contract: LoadedDocument
 
 
 @pytest.mark.parametrize("page", [9, 0])
-def test_out_of_range_page_with_invented_quote_not_found(contract: LoadedDocument, page: int) -> None:
+def test_out_of_range_page_with_invented_quote_not_found(
+    contract: LoadedDocument, page: int
+) -> None:
     q = check_quote(Quote(document=1, page=page, text="penalty of $5,000"), [contract])
     assert q.status == "not_found"
 
@@ -93,7 +97,9 @@ def test_no_documents_rejected() -> None:
     assert llm.calls == 0
 
 
-def test_ask_sends_all_docs_and_checks_quotes(contract: LoadedDocument, invoice: LoadedDocument) -> None:
+def test_ask_sends_all_docs_and_checks_quotes(
+    contract: LoadedDocument, invoice: LoadedDocument
+) -> None:
     answer = AnswerData(
         answer="30 days.",
         quotes=[

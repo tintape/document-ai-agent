@@ -59,7 +59,9 @@ def test_type_detected_from_bytes_not_name(settings: Settings) -> None:
         ("empty.pdf", b"", "empty"),
     ],
 )
-def test_bad_files_raise_friendly_error(name: str, data: bytes, msg: str, settings: Settings) -> None:
+def test_bad_files_raise_friendly_error(
+    name: str, data: bytes, msg: str, settings: Settings
+) -> None:
     with pytest.raises(DocumentError, match=msg):
         load_document(name, data, settings)
 

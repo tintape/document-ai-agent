@@ -27,7 +27,9 @@ def cache_dir(tmp_path: Path) -> Path:
     cached = ExtractionResult(SAMPLE, "invoice", make_invoice(), (), CALL, cached=False)
     save_extraction(cached, tmp_path)
     quote = CheckedQuote(SAMPLE, 1, "Total due: USD 332.50", "verified", "")
-    save_answer(SAMPLE, AnswerResult("What is the total?", "USD 332.50", (quote,), CALL, False), tmp_path)
+    save_answer(
+        SAMPLE, AnswerResult("What is the total?", "USD 332.50", (quote,), CALL, False), tmp_path
+    )
     return tmp_path
 
 
@@ -46,7 +48,9 @@ def test_ledger_is_immutable_and_sums() -> None:
 
 
 def test_live_extraction_adds_call(doc: LoadedDocument, cache_dir: Path) -> None:
-    outcome = run_extraction(doc, "invoice", StubLLM(make_invoice()), SessionLedger(), None, cache_dir)
+    outcome = run_extraction(
+        doc, "invoice", StubLLM(make_invoice()), SessionLedger(), None, cache_dir
+    )
     assert outcome.result is not None and outcome.result.cached is False
     assert len(outcome.ledger.calls) == 1
     assert outcome.error is None and outcome.notice is None
@@ -54,14 +58,18 @@ def test_live_extraction_adds_call(doc: LoadedDocument, cache_dir: Path) -> None
 
 def test_session_spent_is_passed_to_llm(doc: LoadedDocument, cache_dir: Path) -> None:
     llm = StubLLM(make_invoice())
-    run_extraction(doc, "invoice", llm, SessionLedger().add(CALL), None, cache_dir, simulate_failures=1)
+    run_extraction(
+        doc, "invoice", llm, SessionLedger().add(CALL), None, cache_dir, simulate_failures=1
+    )
     assert llm.last["session_spent"] == pytest.approx(CALL.cost_usd)
     assert llm.last["simulate_failures"] == 1
 
 
 @pytest.mark.parametrize("kind", ["budget", "no_key", "network", "overloaded", "rate_limit"])
 def test_sample_falls_back_to_cache(doc: LoadedDocument, cache_dir: Path, kind: str) -> None:
-    outcome = run_extraction(doc, "invoice", StubLLM(error=LLMError(kind)), SessionLedger(), SAMPLE, cache_dir)
+    outcome = run_extraction(
+        doc, "invoice", StubLLM(error=LLMError(kind)), SessionLedger(), SAMPLE, cache_dir
+    )
     assert outcome.result is not None and outcome.result.cached is True
     assert outcome.error is None
     assert outcome.notice
@@ -74,13 +82,17 @@ def test_no_llm_uses_cache_for_samples(doc: LoadedDocument, cache_dir: Path) -> 
 
 
 def test_upload_does_not_use_cache(doc: LoadedDocument, cache_dir: Path) -> None:
-    outcome = run_extraction(doc, "invoice", StubLLM(error=LLMError("budget")), SessionLedger(), None, cache_dir)
+    outcome = run_extraction(
+        doc, "invoice", StubLLM(error=LLMError("budget")), SessionLedger(), None, cache_dir
+    )
     assert outcome.result is None
     assert outcome.error == str(LLMError("budget"))
 
 
 def test_auth_error_is_not_hidden_by_cache(doc: LoadedDocument, cache_dir: Path) -> None:
-    outcome = run_extraction(doc, "invoice", StubLLM(error=LLMError("auth")), SessionLedger(), SAMPLE, cache_dir)
+    outcome = run_extraction(
+        doc, "invoice", StubLLM(error=LLMError("auth")), SessionLedger(), SAMPLE, cache_dir
+    )
     assert outcome.result is None
     assert outcome.error
 
@@ -92,13 +104,19 @@ def test_cache_for_other_doc_type_not_used(doc: LoadedDocument, cache_dir: Path)
 
 
 def test_billed_error_still_counts_in_ledger(doc: LoadedDocument, cache_dir: Path) -> None:
-    outcome = run_extraction(doc, "invoice", StubLLM(error=billed("refusal")), SessionLedger(), None, cache_dir)
+    outcome = run_extraction(
+        doc, "invoice", StubLLM(error=billed("refusal")), SessionLedger(), None, cache_dir
+    )
     assert outcome.result is None
     assert outcome.ledger.spent_usd == pytest.approx(CALL.cost_usd)
 
 
 def test_question_live(doc: LoadedDocument, cache_dir: Path) -> None:
-    llm = StubLLM(AnswerData(answer="USD 332.50", quotes=[Quote(document=1, page=1, text="Total due: USD 332.50")]))
+    llm = StubLLM(
+        AnswerData(
+            answer="USD 332.50", quotes=[Quote(document=1, page=1, text="Total due: USD 332.50")]
+        )
+    )
     outcome = run_question([doc], "What is the total?", llm, SessionLedger(), None, cache_dir)
     assert outcome.result is not None and outcome.result.quotes[0].status == "verified"
     assert len(outcome.ledger.calls) == 1

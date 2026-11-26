@@ -81,7 +81,9 @@ def test_corrupted_cache_returns_none(tmp_path: Path) -> None:
 
 def test_pdf_and_png_samples_do_not_share_cache(tmp_path: Path) -> None:
     pdf = ExtractionResult("invoice_messy_scan.pdf", "invoice", make_invoice(), (), CALL, False)
-    png = ExtractionResult("invoice_messy_scan.png", "invoice", make_invoice(vendor=fv("Other")), (), CALL, False)
+    png = ExtractionResult(
+        "invoice_messy_scan.png", "invoice", make_invoice(vendor=fv("Other")), (), CALL, False
+    )
     save_extraction(pdf, tmp_path)
     save_extraction(png, tmp_path)
     loaded = load_extraction("invoice_messy_scan.pdf", tmp_path)

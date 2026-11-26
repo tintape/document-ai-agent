@@ -16,10 +16,18 @@ QuoteStatus = Literal["verified", "not_found", "unverified"]
 ASK_EFFORT = "medium"
 ASK_MAX_TOKENS = 2000
 MAX_QUESTION_CHARS = 500
-_TRANSLATE = str.maketrans({
-    "‘": "'", "’": "'", "“": '"', "”": '"',
-    "–": "-", "—": "-", "−": "-", " ": " ",
-})
+_TRANSLATE = str.maketrans(
+    {
+        "\u2018": "'",
+        "\u2019": "'",
+        "\u201c": '"',
+        "\u201d": '"',
+        "\u2013": "-",
+        "\u2014": "-",
+        "\u2212": "-",
+        "\u00a0": " ",
+    }
+)
 _SPACES = re.compile(r"\s+")
 
 
@@ -50,7 +58,9 @@ def check_quote(quote: Quote, docs: Sequence[LoadedDocument]) -> CheckedQuote:
         return CheckedQuote("?", quote.page, quote.text, "not_found", "no such document")
     doc = docs[quote.document - 1]
     if not doc.has_text_layer:
-        return CheckedQuote(doc.name, quote.page, quote.text, "unverified", "scan: no text to check")
+        return CheckedQuote(
+            doc.name, quote.page, quote.text, "unverified", "scan: no text to check"
+        )
     needle = normalize(quote.text)
     if not needle:
         return CheckedQuote(doc.name, quote.page, quote.text, "not_found", "empty quote")

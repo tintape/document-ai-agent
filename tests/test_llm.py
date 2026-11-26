@@ -24,7 +24,9 @@ def status_error(cls: type[anthropic.APIStatusError], status: int) -> anthropic.
     return cls("boom", response=_response(status), body=None)
 
 
-def ok(parsed: object = None, cost: float | None = 0.0002, stop: str = "end_turn") -> SimpleNamespace:
+def ok(
+    parsed: object = None, cost: float | None = 0.0002, stop: str = "end_turn"
+) -> SimpleNamespace:
     extra = {} if cost is None else {"cost": cost}
     return SimpleNamespace(
         stop_reason=stop,
@@ -96,7 +98,9 @@ def test_success_returns_parsed_and_cost(make_client) -> None:
     assert fake.last_kwargs["output_config"] == {"effort": "medium"}
     assert fake.last_kwargs["output_format"] is AnswerData
     assert fake.last_kwargs["max_tokens"] == 2000
-    assert fake.last_kwargs["messages"] == [{"role": "user", "content": [{"type": "text", "text": "q"}]}]
+    assert fake.last_kwargs["messages"] == [
+        {"role": "user", "content": [{"type": "text", "text": "q"}]}
+    ]
 
 
 def test_retries_rate_limit_then_succeeds(make_client, sleeps: list[float]) -> None:
@@ -107,7 +111,9 @@ def test_retries_rate_limit_then_succeeds(make_client, sleeps: list[float]) -> N
 
 
 def test_backoff_doubles(make_client, sleeps: list[float]) -> None:
-    client, _ = make_client([anthropic.APIConnectionError(request=httpx2.Request("POST", URL))] * 2 + [ok()])
+    client, _ = make_client(
+        [anthropic.APIConnectionError(request=httpx2.Request("POST", URL))] * 2 + [ok()]
+    )
     assert call(client).call.attempts == 3
     assert 1.0 <= sleeps[0] <= 1.5
     assert 2.0 <= sleeps[1] <= 2.5
@@ -163,7 +169,9 @@ def test_refusal_and_truncation(make_client, stop: str, kind: str) -> None:
 
 
 @pytest.mark.parametrize("stop", ["refusal", "max_tokens"])
-def test_billed_failures_still_count_against_budget(make_client, store: BudgetStore, stop: str) -> None:
+def test_billed_failures_still_count_against_budget(
+    make_client, store: BudgetStore, stop: str
+) -> None:
     client, _ = make_client([ok(stop=stop, cost=0.0003)])
     with pytest.raises(LLMError) as err:
         call(client)

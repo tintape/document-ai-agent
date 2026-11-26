@@ -24,7 +24,10 @@ SAMPLES: dict[str, str] = {
 }
 SAMPLE_QUESTIONS: dict[str, tuple[str, ...]] = {
     "invoice_clean.pdf": ("What is the total amount due?", "When is the payment due?"),
-    "invoice_multipage.pdf": ("How many hours of consulting were billed?", "Who issued this invoice?"),
+    "invoice_multipage.pdf": (
+        "How many hours of consulting were billed?",
+        "Who issued this invoice?",
+    ),
     "invoice_messy_scan.pdf": ("What is the total amount due?", "Is there a due date?"),
     "invoice_messy_scan.png": ("What is the total amount due?", "Who is the buyer?"),
     "contract_services.pdf": (
