@@ -134,7 +134,9 @@ def contract_services() -> None:
     w.line("Harbor Point Clinics Inc., 12 Bayview Rd, Eugene, OR (the Client).")
     w.gap()
     w.line("1. Services", bold=True)
-    w.line("The Provider will run monthly patient-flow reports and maintain the reporting dashboard.")
+    w.line(
+        "The Provider will run monthly patient-flow reports and maintain the reporting dashboard."
+    )
     w.line("2. Term", bold=True)
     w.line("The agreement starts on 2026-11-01 and lasts 12 months.")
     w.line("3. Fees", bold=True)
@@ -148,7 +150,9 @@ def contract_services() -> None:
     w.line("6. Governing law", bold=True)
     w.line("This agreement is governed by the laws of the State of Oregon.")
     w.gap(2)
-    w.line("Signed: Maya Ortiz, Lumen Analytics LLC        Signed: Daniel Reyes, Harbor Point Clinics Inc.")
+    w.line(
+        "Signed: Maya Ortiz, Lumen Analytics LLC        Signed: Daniel Reyes, Harbor Point Clinics Inc."
+    )
     w.save()
 
 
