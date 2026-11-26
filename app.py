@@ -157,6 +157,8 @@ def fields_table(result: ExtractionResult) -> None:
     styled = frame.style.apply(lambda row: [ISSUE_STYLE if row["issue"] else ""] * len(row), axis=1)
     columns = {
         "field": st.column_config.TextColumn(width="medium"),
+        "confidence": st.column_config.TextColumn(width="small"),
+        "page": st.column_config.TextColumn(width="small"),
         "issue": st.column_config.TextColumn(width="large"),
     }
     st.dataframe(styled, hide_index=True, width="stretch", column_config=columns)
@@ -189,8 +191,12 @@ def extract_tab(sel: Selection, simulate: int) -> None:
     if outcome.result is not None:
         if outcome.result.cached:
             st.caption(":gray-background[cached result]")
-        issues = len(outcome.result.flags)
-        st.write(f"**{issues} issue(s)** found by our checks." if issues else "All checks passed.")
+        flags = outcome.result.flags
+        st.write(
+            f"**{len(flags)} issue(s)** found by our checks:" if flags else "All checks passed."
+        )
+        for flag in flags:
+            st.markdown(f"- **{md_escape(flag.field)}**: {md_escape(flag.reason)}")
         fields_table(outcome.result)
 
 
