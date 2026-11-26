@@ -1,6 +1,7 @@
 from datetime import date
 from pathlib import Path
 from types import SimpleNamespace
+from typing import get_args
 
 import anthropic
 import httpx2
@@ -8,7 +9,7 @@ import pytest
 
 from doc_agent.budget import BudgetStore
 from doc_agent.config import Settings, load_settings
-from doc_agent.llm import LLMClient, LLMError, build_sdk
+from doc_agent.llm import ErrorKind, LLMClient, LLMError, build_sdk
 from doc_agent.schemas import AnswerData
 
 DAY = date(2026, 11, 27)
@@ -238,3 +239,8 @@ def test_build_sdk_uses_bearer_and_no_sdk_retries(settings: Settings) -> None:
     assert sdk.auth_token == "test"
     assert sdk.api_key is None
     assert sdk.max_retries == 0
+
+
+@pytest.mark.parametrize("kind", list(get_args(ErrorKind)))
+def test_every_error_kind_has_a_default_message(kind: str) -> None:
+    assert str(LLMError(kind))

@@ -35,6 +35,7 @@ MESSAGES: dict[str, str] = {
     "truncated": "The model's answer was cut off. Try a shorter document.",
     "bad_request": "The AI service could not process this request (the file may be unsupported).",
     "bad_format": "The model's answer did not match the expected format. Please try again.",
+    "budget": "The demo spending limit has been reached. Sample results are still available.",
     "credits": "The AI account is out of credits, so live requests are off.",
     "session": "Your demo budget for this session is used up. Sample results are still available.",
     "daily": "The demo budget for today is used up. Sample results are still available.",
