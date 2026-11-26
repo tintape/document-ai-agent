@@ -1,0 +1,357 @@
+{
+  "doc_name": "invoice_multipage.pdf",
+  "doc_type": "invoice",
+  "data": {
+    "vendor": {
+      "value": "Copperline Consulting GmbH",
+      "confidence": "high",
+      "page": 1
+    },
+    "buyer": {
+      "value": "Altitude Outdoor Gear Inc., 55 Summit Ave, Denver, CO 80202",
+      "confidence": "high",
+      "page": 1
+    },
+    "invoice_number": {
+      "value": "CC-7781",
+      "confidence": "high",
+      "page": 1
+    },
+    "invoice_date": {
+      "value": "15 October 2026",
+      "confidence": "high",
+      "page": 1
+    },
+    "due_date": {
+      "value": "14 November 2026",
+      "confidence": "high",
+      "page": 1
+    },
+    "currency": {
+      "value": "USD",
+      "confidence": "high",
+      "page": 2
+    },
+    "tax": {
+      "value": "USD 1,150.40",
+      "confidence": "high",
+      "page": 2
+    },
+    "total": {
+      "value": "USD 15,530.40",
+      "confidence": "high",
+      "page": 2
+    },
+    "line_items": [
+      {
+        "description": {
+          "value": "Discovery workshop",
+          "confidence": "high",
+          "page": 1
+        },
+        "quantity": {
+          "value": "1",
+          "confidence": "high",
+          "page": 1
+        },
+        "unit_price": {
+          "value": "1,800.00",
+          "confidence": "high",
+          "page": 1
+        },
+        "amount": {
+          "value": "1,800.00",
+          "confidence": "high",
+          "page": 1
+        }
+      },
+      {
+        "description": {
+          "value": "Strategy consulting (hours)",
+          "confidence": "high",
+          "page": 1
+        },
+        "quantity": {
+          "value": "12",
+          "confidence": "high",
+          "page": 1
+        },
+        "unit_price": {
+          "value": "150.00",
+          "confidence": "high",
+          "page": 1
+        },
+        "amount": {
+          "value": "1,800.00",
+          "confidence": "high",
+          "page": 1
+        }
+      },
+      {
+        "description": {
+          "value": "Implementation consulting (hours)",
+          "confidence": "high",
+          "page": 1
+        },
+        "quantity": {
+          "value": "20",
+          "confidence": "high",
+          "page": 1
+        },
+        "unit_price": {
+          "value": "135.00",
+          "confidence": "high",
+          "page": 1
+        },
+        "amount": {
+          "value": "2,700.00",
+          "confidence": "high",
+          "page": 1
+        }
+      },
+      {
+        "description": {
+          "value": "Data migration, product catalog",
+          "confidence": "high",
+          "page": 1
+        },
+        "quantity": {
+          "value": "1",
+          "confidence": "high",
+          "page": 1
+        },
+        "unit_price": {
+          "value": "950.00",
+          "confidence": "high",
+          "page": 1
+        },
+        "amount": {
+          "value": "950.00",
+          "confidence": "high",
+          "page": 1
+        }
+      },
+      {
+        "description": {
+          "value": "Data migration, customer records",
+          "confidence": "high",
+          "page": 1
+        },
+        "quantity": {
+          "value": "1",
+          "confidence": "high",
+          "page": 1
+        },
+        "unit_price": {
+          "value": "1,100.00",
+          "confidence": "high",
+          "page": 1
+        },
+        "amount": {
+          "value": "1,100.00",
+          "confidence": "high",
+          "page": 1
+        }
+      },
+      {
+        "description": {
+          "value": "Inventory sync setup",
+          "confidence": "high",
+          "page": 1
+        },
+        "quantity": {
+          "value": "1",
+          "confidence": "high",
+          "page": 1
+        },
+        "unit_price": {
+          "value": "700.00",
+          "confidence": "high",
+          "page": 1
+        },
+        "amount": {
+          "value": "700.00",
+          "confidence": "high",
+          "page": 1
+        }
+      },
+      {
+        "description": {
+          "value": "Checkout flow review",
+          "confidence": "high",
+          "page": 1
+        },
+        "quantity": {
+          "value": "1",
+          "confidence": "high",
+          "page": 1
+        },
+        "unit_price": {
+          "value": "450.00",
+          "confidence": "high",
+          "page": 1
+        },
+        "amount": {
+          "value": "450.00",
+          "confidence": "high",
+          "page": 1
+        }
+      },
+      {
+        "description": {
+          "value": "Staff training session",
+          "confidence": "high",
+          "page": 1
+        },
+        "quantity": {
+          "value": "2",
+          "confidence": "high",
+          "page": 1
+        },
+        "unit_price": {
+          "value": "380.00",
+          "confidence": "high",
+          "page": 1
+        },
+        "amount": {
+          "value": "760.00",
+          "confidence": "high",
+          "page": 1
+        }
+      },
+      {
+        "description": {
+          "value": "Training materials",
+          "confidence": "high",
+          "page": 1
+        },
+        "quantity": {
+          "value": "1",
+          "confidence": "high",
+          "page": 1
+        },
+        "unit_price": {
+          "value": "220.00",
+          "confidence": "high",
+          "page": 1
+        },
+        "amount": {
+          "value": "220.00",
+          "confidence": "high",
+          "page": 1
+        }
+      },
+      {
+        "description": {
+          "value": "Analytics dashboard setup",
+          "confidence": "high",
+          "page": 2
+        },
+        "quantity": {
+          "value": "1",
+          "confidence": "high",
+          "page": 2
+        },
+        "unit_price": {
+          "value": "640.00",
+          "confidence": "high",
+          "page": 2
+        },
+        "amount": {
+          "value": "640.00",
+          "confidence": "high",
+          "page": 2
+        }
+      },
+      {
+        "description": {
+          "value": "Payment provider integration",
+          "confidence": "high",
+          "page": 2
+        },
+        "quantity": {
+          "value": "1",
+          "confidence": "high",
+          "page": 2
+        },
+        "unit_price": {
+          "value": "880.00",
+          "confidence": "high",
+          "page": 2
+        },
+        "amount": {
+          "value": "880.00",
+          "confidence": "high",
+          "page": 2
+        }
+      },
+      {
+        "description": {
+          "value": "Load testing",
+          "confidence": "high",
+          "page": 2
+        },
+        "quantity": {
+          "value": "1",
+          "confidence": "high",
+          "page": 2
+        },
+        "unit_price": {
+          "value": "520.00",
+          "confidence": "high",
+          "page": 2
+        },
+        "amount": {
+          "value": "520.00",
+          "confidence": "high",
+          "page": 2
+        }
+      },
+      {
+        "description": {
+          "value": "Post-launch support (hours)",
+          "confidence": "high",
+          "page": 2
+        },
+        "quantity": {
+          "value": "8",
+          "confidence": "high",
+          "page": 2
+        },
+        "unit_price": {
+          "value": "120.00",
+          "confidence": "high",
+          "page": 2
+        },
+        "amount": {
+          "value": "960.00",
+          "confidence": "high",
+          "page": 2
+        }
+      },
+      {
+        "description": {
+          "value": "Project management",
+          "confidence": "high",
+          "page": 2
+        },
+        "quantity": {
+          "value": "1",
+          "confidence": "high",
+          "page": 2
+        },
+        "unit_price": {
+          "value": "900.00",
+          "confidence": "high",
+          "page": 2
+        },
+        "amount": {
+          "value": "900.00",
+          "confidence": "high",
+          "page": 2
+        }
+      }
+    ]
+  },
+  "flags": []
+}

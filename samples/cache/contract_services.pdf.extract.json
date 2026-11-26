@@ -1,0 +1,49 @@
+{
+  "doc_name": "contract_services.pdf",
+  "doc_type": "contract",
+  "data": {
+    "parties": [
+      {
+        "value": "Lumen Analytics LLC",
+        "confidence": "high",
+        "page": 1
+      },
+      {
+        "value": "Harbor Point Clinics Inc.",
+        "confidence": "high",
+        "page": 1
+      }
+    ],
+    "signing_date": {
+      "value": "2026-10-15",
+      "confidence": "high",
+      "page": 1
+    },
+    "term": {
+      "value": "12 months",
+      "confidence": "high",
+      "page": 1
+    },
+    "amount": {
+      "value": "USD 24,000",
+      "confidence": "high",
+      "page": 1
+    },
+    "payment_terms": {
+      "value": "payable within 15 days (net 15)",
+      "confidence": "high",
+      "page": 1
+    },
+    "termination_notice": {
+      "value": "30 days written notice",
+      "confidence": "high",
+      "page": 2
+    },
+    "governing_law": {
+      "value": "State of Oregon",
+      "confidence": "high",
+      "page": 2
+    }
+  },
+  "flags": []
+}
